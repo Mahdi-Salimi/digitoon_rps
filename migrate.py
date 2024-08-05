@@ -1,4 +1,4 @@
-from .models import User, Match
+from models import User, Match
 
 User.create_table()
 User.migrate()

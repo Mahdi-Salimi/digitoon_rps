@@ -134,4 +134,14 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+    
+    
+# git_ignore
+# requirements
+# liscence
+# delete
+# validation for users
+# migrations
+#logs
+# readme
 

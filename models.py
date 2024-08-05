@@ -29,3 +29,5 @@ class Match(Model):
         self.player1_score = player1_score
         self.player2_score = player2_score
         self.result = result
+        
+        

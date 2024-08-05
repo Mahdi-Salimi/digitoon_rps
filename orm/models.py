@@ -26,10 +26,10 @@ class ModelMeta(type):
         attrs['_columns'] = columns
         new_class = super().__new__(cls, name, bases, attrs)
         return new_class
-
+   
     def __init__(cls: Type['Model'], name: str, bases: Tuple[type], attrs: Dict[str, Any]) -> None:
-        super().__init__(name, bases, attrs)
-
+            super().__init__(name, bases, attrs)
+            
 class Model(metaclass=ModelMeta):
     _columns: Dict[str, Field]
 
