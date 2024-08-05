@@ -1,11 +1,12 @@
 import sqlite3
+import os
 from typing import List, Optional
 
 '''
 This class will handle connections to the database
 '''
 class Connections:
-    def __init__(self, db_name='orm'):
+    def __init__(self, db_name='orm.db'):
         self.connection = sqlite3.connect(db_name)
     
     def execute(self, query: str, params: Optional[tuple] = ()) -> sqlite3.Cursor:

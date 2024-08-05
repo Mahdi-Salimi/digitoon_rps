@@ -1,7 +1,5 @@
-from orm.cnt import db
-
-
-from typing import Dict, List
+from typing import Dict, List, Any, Tuple, Type
+from .cnt import db
 
 
 class Field:
@@ -19,7 +17,7 @@ class StringField(Field):
 
 
 class ModelMeta(type):
-    def __new__(cls, name: str, bases: tuple, attrs: dict):
+    def __new__(cls: Type['ModelMeta'], name: str, bases: Tuple[type], attrs: Dict[str, Any]) -> 'ModelMeta':
         if name == 'Model':
             return super().__new__(cls, name, bases, attrs)
         columns = {k: v for k, v in attrs.items() if isinstance(v, Field)}
@@ -27,9 +25,12 @@ class ModelMeta(type):
             attrs.pop(column)
         attrs['_columns'] = columns
         new_class = super().__new__(cls, name, bases, attrs)
-        return new_class     
+        return new_class
 
-class Model(ModelMeta):
+    def __init__(cls: Type['Model'], name: str, bases: Tuple[type], attrs: Dict[str, Any]) -> None:
+        super().__init__(name, bases, attrs)
+
+class Model(metaclass=ModelMeta):
     _columns: Dict[str, Field]
 
     @classmethod
