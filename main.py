@@ -53,7 +53,7 @@ def play_game(player1: User, player2: User):
 
     if player1_wins > player2_wins:
         print(f"{player1.username} wins the game!")
-        result = f"Win against {player2.username}: {player1_wins} rounds to {player2_wins}."
+        result = f"Winner {player2.username}: {player1_wins} rounds to {player2_wins}."
         player1.score += 1
         player1.games_played += 1
         player2.games_played += 1
@@ -63,7 +63,7 @@ def play_game(player1: User, player2: User):
         return player1.username
     else:
         print(f"{player2.username} wins the game!")
-        result = f"Win against {player1.username}: {player2_wins} rounds to {player1_wins}."
+        result = f"Winner {player1.username}: {player2_wins} rounds to {player1_wins}."
         player2.score += 1
         player2.games_played += 1
         player1.games_played += 1
@@ -114,12 +114,14 @@ def main() -> None:
         elif action == 'history':
             username = input("Enter the username to view history: ")
             player = User.get(username=username)
+            print(vars(player))
             if player:
                 matches = Match.all()
                 user_matches = [match for match in matches if match.player1_id == player.id or match.player2_id == player.id]
+                print(user_matches)
                 print(f"\n{username}'s last 5 matches:")
                 for match in user_matches[-5:]:
-                    print(match)
+                    print(match.result)
             else:
                 print("User not found or not registered.")
 
