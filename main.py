@@ -74,10 +74,6 @@ def play_game(player1: User, player2: User):
 
 
 def main() -> None:
-    User.create_table()
-    User.migrate()
-    Match.create_table()
-    Match.migrate()
 
     while True:
         action = input("Choose an action: register, play, leaderboard, history, quit: ").lower()
