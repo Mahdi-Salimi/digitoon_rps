@@ -1,6 +1,14 @@
 from models import User, Match
 from orm.cnt import Connections
+import logging
+from datetime import datetime
 
+logging.basicConfig(
+    filename='game_log.txt',
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S'
+)
 def get_winner(move1: str, move2: str) -> str:
     '''
     returns winner of each round
@@ -60,7 +68,7 @@ def play_game(player1: User, player2: User):
         player1.save()
         player2.save()
         Match(player1_id=player1.id, player2_id=player2.id, player1_score=player1_wins, player2_score=player2_wins, result=result).save()
-        return player1.username
+        return player1.username, result
     else:
         print(f"{player2.username} wins the game!")
         result = f"Winner {player1.username}: {player2_wins} rounds to {player1_wins}."
@@ -70,19 +78,19 @@ def play_game(player1: User, player2: User):
         player1.save()
         player2.save()
         Match(player1_id=player1.id, player2_id=player2.id, player1_score=player1_wins, player2_score=player2_wins, result=result).save()
-        return player2.username
+        return player2.username, result
 
 
 def main() -> None:
 
     while True:
-        action = input("Choose an action: register, play, leaderboard, history, quit: ").lower()
+        action = input("Choose an action: register:, play, leaderboard, history, quit: ").lower()
 
         if action == 'register':
             username = input("Enter a username: ")
             if User.get(username=username) is None:
                 User(username=username).save()
-                print(User.get(username=username))
+                logging.info(f"User registered: {username}")
                 print(f"User {username} registered successfully.")
             else:
                 print("Username already taken.")
@@ -94,7 +102,8 @@ def main() -> None:
             player2 = User.get(username=user2)
             if player1 and player2:
                 while True:
-                    winner = play_game(player1, player2)
+                    game = play_game(player1, player2)
+                    logging.info(f"Game played between {player1.username} and {player2.username}. Result: {game[1]}")
                     play_again = input("Do you want to play again? (yes/no): ").lower()
                     if play_again != 'yes':
                         break

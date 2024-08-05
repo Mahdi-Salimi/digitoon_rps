@@ -39,3 +39,5 @@ After setting up the database, you can start the game:
 
 ```bash
 python3 main.py
+
+
