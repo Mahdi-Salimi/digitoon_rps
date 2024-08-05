@@ -29,3 +29,5 @@ class Connections:
         cursor = self.execute(f"PRAGMA table_info({table_name})")
         return [row[1] for row in cursor.fetchall()]
     
+    
+db = Connections()
