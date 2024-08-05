@@ -10,6 +10,9 @@ class User(Model):
         self.username = username
         self.score = score
         self.games_played = games_played
+        
+    def __str__(self) -> str:
+        return f"{self.username} - {self.score} points - {self.games_played} games played"
 
 
 class Match(Model):

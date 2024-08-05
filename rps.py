@@ -1,48 +1,4 @@
-from typing import List
-
-
-class User:
-    def __init__(self, username: str):
-        self.username = username
-        self.score = 0
-        self.history = []
-        self.games_played = 0
-
-    def add_result(self, result: str) -> None:
-        self.history.append(result)
-        self.games_played += 1
-        if len(self.history) > 5:
-            self.history.pop(0)
-
-    def get_history(self) -> List[str]:
-        return self.history
-
-    def __str__(self) -> str:
-        return f"{self.username} - {self.score} points - {self.games_played} games played"
-
-
-class Leaderboard:
-    _instance = None
-
-    def __new__(cls):
-        if cls._instance is None:
-            cls._instance = super(Leaderboard, cls).__new__(cls)
-            cls._instance.users = {}
-        return cls._instance
-
-    def add_user(self, username: str) -> None:
-        if username not in self.users:
-            self.users[username] = User(username)
-
-    def record_win(self, winner: str) -> None:
-        if winner in self.users:
-            self.users[winner].score += 1
-
-    def get_leaderboard(self) -> List[str]:
-        sorted_users = sorted(self.users.values(),
-                              key=lambda x: x.score, reverse=True)
-        return [str(user) for user in sorted_users]
-
+from .models import User, Match
 
 def get_winner(move1: str, move2: str) -> str:
     '''
@@ -97,62 +53,75 @@ def play_game(player1: User, player2: User):
     if player1_wins > player2_wins:
         print(f"{player1.username} wins the game!")
         result = f"Win against {player2.username}: {player1_wins} rounds to {player2_wins}."
-        player1.add_result(result)
-        player2.add_result(
-            f"Loss against {player1.username}: {player2_wins} rounds to {player1_wins}.")
+        player1.score += 1
+        player1.games_played += 1
+        player2.games_played += 1
+        player1.save()
+        player2.save()
+        Match(player1_id=player1.id, player2_id=player2.id, player1_score=player1_wins, player2_score=player2_wins, result=result).save()
         return player1.username
     else:
         print(f"{player2.username} wins the game!")
         result = f"Win against {player1.username}: {player2_wins} rounds to {player1_wins}."
-        player2.add_result(result)
-        player1.add_result(
-            f"Loss against {player2.username}: {player1_wins} rounds to {player2_wins}.")
+        player2.score += 1
+        player2.games_played += 1
+        player1.games_played += 1
+        player1.save()
+        player2.save()
+        Match(player1_id=player1.id, player2_id=player2.id, player1_score=player1_wins, player2_score=player2_wins, result=result).save()
         return player2.username
 
 
 def main() -> None:
-    leaderboard = Leaderboard()
+    User.create_table()
+    User.migrate()
+    Match.create_table()
+    Match.migrate()
 
     while True:
-        # print(leaderboard.users)
-        action = input(
-            "Choose an action: register, play, leaderboard, history, quit: ").lower()
+        action = input("Choose an action: register, play, leaderboard, history, quit: ").lower()
 
         if action == 'register':
             username = input("Enter a username: ")
-            leaderboard.add_user(username)
-            print(f"User {username} registered successfully.")
+            if User.get(username=username) is None:
+                User(username=username).save()
+                print(f"User {username} registered successfully.")
+            else:
+                print("Username already taken.")
 
         elif action == 'play':
             user1 = input("Enter the username of player 1: ")
             user2 = input("Enter the username of player 2: ")
-            if user1 in leaderboard.users and user2 in leaderboard.users:
+            player1 = User.get(username=user1)
+            player2 = User.get(username=user2)
+            if player1 and player2:
                 while True:
-                    winner = play_game(
-                        leaderboard.users[user1], leaderboard.users[user2])
-                    if winner:
-                        leaderboard.record_win(winner)
-                    play_again = input(
-                        "Do you want to play again? (yes/no): ").lower()
+                    winner = play_game(player1, player2)
+                    play_again = input("Do you want to play again? (yes/no): ").lower()
                     if play_again != 'yes':
                         break
             else:
                 print("Both users must be registered to play.")
 
         elif action == 'leaderboard':
-            if leaderboard.users:
+            users = User.all()
+            if users:
                 print("\nLeaderboard:")
-                for entry in leaderboard.get_leaderboard():
-                    print(entry)
+                sorted_users = sorted(users, key=lambda x: x.score, reverse=True)
+                for user in sorted_users:
+                    print(user)
             else:
                 print("No users registered yet.")
 
         elif action == 'history':
             username = input("Enter the username to view history: ")
-            if username in leaderboard.users:
+            player = User.get(username=username)
+            if player:
+                matches = Match.findall()
+                user_matches = [match for match in matches if match.player1_id == player.id or match.player2_id == player.id]
                 print(f"\n{username}'s last 5 matches:")
-                for result in leaderboard.users[username].get_history():
-                    print(result)
+                for match in user_matches[-5:]:
+                    print(match)
             else:
                 print("User not found or not registered.")
 
