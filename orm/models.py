@@ -59,7 +59,7 @@ class Model(metaclass=ModelMeta):
         columns = ', '.join(self._columns.keys())
         placeholders = ', '.join(['?' for _ in self._columns])
         values = [getattr(self, col) for col in self._columns.keys()]
-        if hasattr(self, 'id'):
+        if self.id != None:
             values.append(self.id)
             db.execute(
                 f"UPDATE {self.__class__.__name__.lower()} SET {', '.join(f'{col}=?' for col in self._columns)} WHERE id=?", 

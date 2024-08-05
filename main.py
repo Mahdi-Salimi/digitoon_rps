@@ -82,6 +82,7 @@ def main() -> None:
             username = input("Enter a username: ")
             if User.get(username=username) is None:
                 User(username=username).save()
+                print(User.get(username=username))
                 print(f"User {username} registered successfully.")
             else:
                 print("Username already taken.")
@@ -114,7 +115,7 @@ def main() -> None:
             username = input("Enter the username to view history: ")
             player = User.get(username=username)
             if player:
-                matches = Match.findall()
+                matches = Match.all()
                 user_matches = [match for match in matches if match.player1_id == player.id or match.player2_id == player.id]
                 print(f"\n{username}'s last 5 matches:")
                 for match in user_matches[-5:]:
